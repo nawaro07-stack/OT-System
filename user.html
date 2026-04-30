@@ -38,16 +38,16 @@
 const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
 
 // ================= GET USER =================
-
-const empcode = user.empcode;
-const name = user.name;
-const phase = user.phase;
 const user = JSON.parse(localStorage.getItem("user"));
 
 if(!user){
   alert("No user data กรุณา login ใหม่");
   window.location.href = "login.html";
 }
+const empcode = user.empcode;
+const name = user.name;
+const phase = user.phase;
+
 
 
 // 👉 set hidden fields
