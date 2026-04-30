@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+</head>
+<body>
+
+<h2>Admin Dashboard</h2>
+
+<select id="weekFilter" onchange="load()">
+  <option value="">All Week</option>
+</select>
+
+<select id="phaseFilter" onchange="load()">
+  <option value="">All Phase</option>
+</select>
+
+<table border="1" id="tbl"></table>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
+const params = new URLSearchParams(window.location.search);
+const role = params.get("role");
+
+if(role !== "admin"){
+  alert("Access denied");
+  window.location.href = "login.html";
+}
+function load(){
+  fetch(API+"?action=getAllData")
+  .then(res=>res.json())
+  .then(data=>{
+
+    let weekSet = new Set();
+    let phaseSet = new Set();
+
+    let html = "<tr><th>Empcode</th><th>Name</th><th>Phase</th><th>Week</th><th>Total OT</th></tr>";
+
+    data.forEach(r=>{
+      weekSet.add(r.week);
+      phaseSet.add(r.phase);
+    });
+
+    // filter dropdown
+    const w = document.getElementById("weekFilter");
+    const p = document.getElementById("phaseFilter");
+
+    if(w.options.length == 1){
+      weekSet.forEach(v=>{
+        w.innerHTML += `<option value="${v}">${v}</option>`;
+      });
+    }
+
+    if(p.options.length == 1){
+      phaseSet.forEach(v=>{
+        p.innerHTML += `<option value="${v}">${v}</option>`;
+      });
+    }
+
+    const weekFilter = w.value;
+    const phaseFilter = p.value;
+
+    data.forEach(r=>{
+
+      if(weekFilter && r.week != weekFilter) return;
+      if(phaseFilter && r.phase != phaseFilter) return;
+
+      html += `<tr>
+        <td>${r.empcode}</td>
+        <td>${r.name}</td>
+        <td>${r.phase}</td>
+        <td>${r.week}</td>
+        <td>${r.total}</td>
+      </tr>`;
+    });
+
+    document.getElementById("tbl").innerHTML = html;
+  });
+}
+
+load();
+</script>
+
+</body>
+</html>

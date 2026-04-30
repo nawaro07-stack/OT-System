@@ -1,0 +1,39 @@
+<h3>Login</h3>
+
+<form id="loginForm">
+  Empcode: <input name="id"><br><br>
+  Password: <input name="password" type="password"><br><br>
+  <button type="submit">Login</button>
+</form>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
+
+document.getElementById("loginForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  formData.append("action", "login");
+
+  fetch(API, {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    if(data.status === "success"){
+      localStorage.setItem("user", JSON.stringify(data));
+
+      if(data.role === "admin"){
+        location.href = "admin.html";
+      } else {
+        location.href = "user.html";
+      }
+    } else {
+      alert("Login fail");
+    }
+
+  });
+});
+</script>
