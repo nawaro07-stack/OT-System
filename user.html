@@ -38,16 +38,17 @@
 const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
 
 // ================= GET USER =================
-const params = new URLSearchParams(window.location.search);
-const empcode = params.get("empcode");
-const name = params.get("name") || "";
-const phase = params.get("phase") || "";
 
-// ❗ กันเข้าโดยไม่ login
-if(!empcode){
+const empcode = user.empcode;
+const name = user.name;
+const phase = user.phase;
+const user = JSON.parse(localStorage.getItem("user"));
+
+if(!user){
   alert("No user data กรุณา login ใหม่");
   window.location.href = "login.html";
 }
+
 
 // 👉 set hidden fields
 document.getElementById("empcodeField").value = empcode;
