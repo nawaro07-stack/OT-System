@@ -9,7 +9,7 @@
 
 <h3 id="username"></h3>
 
-<!-- iframe กัน CORS -->
+<!-- iframe สำหรับ submit (save) -->
 <iframe name="hiddenFrame" style="display:none;"></iframe>
 
 <form target="hiddenFrame"
@@ -28,76 +28,41 @@
   <button type="submit">Save</button>
 </form>
 
-<h3>Weekly OT: <span id="total">0</span> hr</h3>
+<h3>Weekly OT: <span id="total">-</span> hr</h3>
 <h3 id="alert"></h3>
 
 <h3>History</h3>
-<table border="1" id="tbl"></table>
+<iframe id="historyFrame" style="width:100%; height:300px;"></iframe>
 
 <script>
 const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
 
-// ================= GET USER =================
+// ================= USER SESSION =================
 const user = JSON.parse(localStorage.getItem("user"));
 
 if(!user){
   alert("No user data กรุณา login ใหม่");
   window.location.href = "login.html";
 }
+
 const empcode = user.empcode;
 const name = user.name;
 const phase = user.phase;
 
-
-
-// 👉 set hidden fields
+// 👉 ใส่ค่า hidden form
 document.getElementById("empcodeField").value = empcode;
 document.getElementById("nameField").value = name;
 document.getElementById("phaseField").value = phase;
 
-// 👉 แสดงชื่อ + phase
+// 👉 แสดงชื่อ
 document.getElementById("username").innerText =
   "User: " + name + " (" + empcode + ") - " + phase;
 
 
-// ================= LOAD DATA =================
-function load(){
-  fetch(API + "?action=getMyData&empcode=" + empcode)
-  .then(res => res.json())
-  .then(data => {
+// ================= LOAD HISTORY (แก้ CORS ด้วย iframe) =================
+document.getElementById("historyFrame").src =
+  API + "?action=getMyData&empcode=" + empcode;
 
-    let html = "<tr><th>Date</th><th>OT</th><th>Week</th></tr>";
-
-    let total = 0;
-    let currentWeek = getWeek(new Date());
-
-    data.forEach(r => {
-      html += `<tr>
-        <td>${r.date}</td>
-        <td>${r.ot_hour}</td>
-        <td>${r.week}</td>
-      </tr>`;
-
-      if(r.week == currentWeek){
-        total += Number(r.ot_hour);
-      }
-    });
-
-    document.getElementById("tbl").innerHTML = html;
-
-    total = total.toFixed(1);
-    document.getElementById("total").innerText = total;
-
-    if(total > 36){
-      document.getElementById("alert").innerText = "⚠️ OT เกิน 36 ชั่วโมง!";
-      document.getElementById("alert").style.color = "red";
-    } else {
-      document.getElementById("alert").innerText = "OK";
-      document.getElementById("alert").style.color = "green";
-    }
-
-  });
-}
 
 // ================= AFTER SAVE =================
 function afterSave(){
@@ -105,16 +70,14 @@ function afterSave(){
   location.reload();
 }
 
-// ================= WEEK CALC =================
+
+// ================= WEEK CALC (เผื่อใช้ต่อ) =================
 function getWeek(d){
   d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
-
-// โหลดตอนเปิดหน้า
-load();
 </script>
 
 </body>
