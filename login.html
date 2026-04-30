@@ -7,10 +7,14 @@
 </form>
 
 <script>
+console.log("LOGIN SCRIPT RUNNING");
+
 const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
 
 document.getElementById("loginForm").addEventListener("submit", function(e){
   e.preventDefault();
+
+  console.log("CLICKED");
 
   const formData = new FormData(this);
   formData.append("action", "login");
@@ -21,6 +25,7 @@ document.getElementById("loginForm").addEventListener("submit", function(e){
   })
   .then(res => res.json())
   .then(data => {
+    console.log("DATA:", data);
 
     if(data.status === "success"){
       localStorage.setItem("user", JSON.stringify(data));
@@ -30,10 +35,13 @@ document.getElementById("loginForm").addEventListener("submit", function(e){
       } else {
         location.href = "user.html";
       }
-
     } else {
       alert("Login fail");
     }
+  })
+  .catch(err=>{
+    console.error("ERROR:", err);
+    alert("ERROR");
   });
 });
 </script>
