@@ -1,47 +1,26 @@
 <h3>Login</h3>
 
-<form id="loginForm">
+<!-- 👇 iframe กัน redirect -->
+<iframe name="hiddenFrame" style="display:none;"></iframe>
+
+<form action="https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec"
+      method="POST"
+      target="hiddenFrame"
+      onsubmit="setTimeout(afterLogin,1000);">
+
+  <input type="hidden" name="action" value="login">
+
   Empcode: <input name="id"><br><br>
   Password: <input name="password" type="password"><br><br>
+
   <button type="submit">Login</button>
 </form>
 
 <script>
-console.log("LOGIN SCRIPT RUNNING");
+function afterLogin(){
+  alert("กำลังเข้าสู่ระบบ...");
 
-const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
-
-document.getElementById("loginForm").addEventListener("submit", function(e){
-  e.preventDefault();
-
-  console.log("CLICKED");
-
-  const formData = new FormData(this);
-  formData.append("action", "login");
-
-  fetch(API, {
-    method: "POST",
-    body: formData
-  })
-  .then(res => res.json())
-  .then(data => {
-    console.log("DATA:", data);
-
-    if(data.status === "success"){
-      localStorage.setItem("user", JSON.stringify(data));
-
-      if(data.role === "admin"){
-        location.href = "admin.html";
-      } else {
-        location.href = "user.html";
-      }
-    } else {
-      alert("Login fail");
-    }
-  })
-  .catch(err=>{
-    console.error("ERROR:", err);
-    alert("ERROR");
-  });
-});
+  // 👉 redirect ไป user (temporary)
+  window.location.href = "user.html";
+}
 </script>
