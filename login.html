@@ -1,12 +1,12 @@
 <h3>Login</h3>
 
-<!-- 👇 iframe กัน redirect -->
+<!-- iframe กัน redirect -->
 <iframe name="hiddenFrame" style="display:none;"></iframe>
 
 <form action="https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec"
       method="POST"
       target="hiddenFrame"
-      onsubmit="setTimeout(afterLogin,1000);">
+      onsubmit="setTimeout(afterLogin,800);">
 
   <input type="hidden" name="action" value="login">
 
@@ -18,9 +18,7 @@
 
 <script>
 function afterLogin(){
-  alert("กำลังเข้าสู่ระบบ...");
-
-  // 👉 redirect ไป user (temporary)
+  alert("Login success (กำลังเข้า...)");
   window.location.href = "user.html";
 }
 </script>
