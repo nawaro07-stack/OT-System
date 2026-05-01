@@ -36,14 +36,15 @@
       margin-bottom: 10px;
     }
 
-    input {
+      input {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin-top: 5px;
-      margin-bottom: 10px;
-      border-radius: 8px;
+      margin-bottom: 12px;
+      border-radius: 10px;
       border: 1px solid #ccc;
       font-size: 16px;
+      box-sizing: border-box; /* 🔥 สำคัญ */
     }
 
     button {
@@ -144,6 +145,10 @@ if(!user){
   alert("กรุณา login ใหม่");
   window.location.href = "login.html";
 }
+// 🔥 ถ้าเป็น admin → ส่งไป admin
+if(user.role === "admin"){
+  window.location.href = "admin.html";
+}
 
 const empcode = user.empcode;
 const name = user.name;
@@ -156,6 +161,26 @@ document.getElementById("phaseField").value = phase;
 document.getElementById("username").innerText =
   name + " (" + empcode + ") - " + phase;
 
+window.addEventListener("message", function(e){
+
+  console.log("MESSAGE:", e.data); // debug
+
+  // 🔥 เช็คว่าเป็น object + มี total
+  if(typeof e.data === "object" && e.data.total !== undefined){
+
+    document.getElementById("total").innerText = e.data.total;
+
+    if(e.data.total > 36){
+      document.getElementById("alert").innerText = "⚠️ OT เกิน 36 ชั่วโมง!";
+      document.getElementById("alert").className = "alert-danger";
+    }else{
+      document.getElementById("alert").innerText = "OK";
+      document.getElementById("alert").className = "alert-ok";
+    }
+
+  }
+});
+
 // LOAD HISTORY
 document.getElementById("historyFrame").src =
   API + "?action=getMyData&empcode=" + empcode;
@@ -166,6 +191,6 @@ function afterSave(){
   location.reload();
 }
 </script>
-
+<button onclick="logout()">Logout</button>
 </body>
 </html>
