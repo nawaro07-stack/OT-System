@@ -190,6 +190,11 @@ function afterSave(){
   alert("Saved!");
   location.reload();
 }
+function logout(){
+  localStorage.removeItem("user");
+  window.location.href = "login.html";
+}
+
 </script>
 <button onclick="logout()">Logout</button>
 </body>
