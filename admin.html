@@ -1,85 +1,121 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Dashboard</title>
+  <title>Admin - OT System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{ font-family:Arial; background:#f4f6f9; padding:20px; }
+    .card{ background:white; padding:15px; margin-bottom:15px; border-radius:10px; }
+
+    input{
+      width:100%;
+      padding:10px;
+      margin-bottom:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th,td{
+      border:1px solid #ddd;
+      padding:8px;
+      text-align:center;
+    }
+
+    button{
+      padding:10px;
+      width:100%;
+      background:#d32f2f;
+      color:white;
+      border:none;
+      border-radius:8px;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>Admin Dashboard</h2>
+<h2>Admin Panel</h2>
 
-<select id="weekFilter" onchange="load()">
-  <option value="">All Week</option>
-</select>
+<div class="card">
+  <input type="text" id="search" placeholder="Search name / empcode" onkeyup="render()">
+</div>
 
-<select id="phaseFilter" onchange="load()">
-  <option value="">All Phase</option>
-</select>
+<div class="card">
+  <table id="tbl"></table>
+</div>
 
-<table border="1" id="tbl"></table>
+<div class="card">
+  <button onclick="logout()">Logout</button>
+</div>
 
 <script>
-const user = JSON.parse(localStorage.getItem("user"));
-const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
-const params = new URLSearchParams(window.location.search);
-const role = params.get("role");
 
-if(role !== "admin"){
-  alert("Access denied");
+const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
+
+// ================= AUTH =================
+const user = JSON.parse(localStorage.getItem("user"));
+
+if(!user || user.role !== "admin"){
+  alert("ไม่มีสิทธิ์");
   window.location.href = "login.html";
 }
+
+let allData = [];
+
+// ================= LOAD =================
 function load(){
-  fetch(API+"?action=getAllData")
-  .then(res=>res.json())
-  .then(data=>{
 
-    let weekSet = new Set();
-    let phaseSet = new Set();
+  fetch(API + "?action=getAdminData")
+  .then(res => res.json())
+  .then(data => {
 
-    let html = "<tr><th>Empcode</th><th>Name</th><th>Phase</th><th>Week</th><th>Total OT</th></tr>";
+    allData = data;
+    render();
 
-    data.forEach(r=>{
-      weekSet.add(r.week);
-      phaseSet.add(r.phase);
-    });
+  });
+}
 
-    // filter dropdown
-    const w = document.getElementById("weekFilter");
-    const p = document.getElementById("phaseFilter");
 
-    if(w.options.length == 1){
-      weekSet.forEach(v=>{
-        w.innerHTML += `<option value="${v}">${v}</option>`;
-      });
-    }
+// ================= RENDER =================
+function render(){
 
-    if(p.options.length == 1){
-      phaseSet.forEach(v=>{
-        p.innerHTML += `<option value="${v}">${v}</option>`;
-      });
-    }
+  const keyword = document.getElementById("search").value.toLowerCase();
 
-    const weekFilter = w.value;
-    const phaseFilter = p.value;
+  let html = "<tr><th>Empcode</th><th>Name</th><th>Phase</th><th>Total OT</th></tr>";
 
-    data.forEach(r=>{
+  allData.forEach(r=>{
 
-      if(weekFilter && r.week != weekFilter) return;
-      if(phaseFilter && r.phase != phaseFilter) return;
+    const text = (r.empcode + r.name).toLowerCase();
+
+    if(text.includes(keyword)){
 
       html += `<tr>
         <td>${r.empcode}</td>
         <td>${r.name}</td>
         <td>${r.phase}</td>
-        <td>${r.week}</td>
         <td>${r.total}</td>
       </tr>`;
-    });
-
-    document.getElementById("tbl").innerHTML = html;
+    }
   });
+
+  document.getElementById("tbl").innerHTML = html;
+}
+
+
+// ================= LOGOUT =================
+function logout(){
+  localStorage.removeItem("user");
+  window.location.href = "login.html";
 }
 
 load();
+
 </script>
 
 </body>
