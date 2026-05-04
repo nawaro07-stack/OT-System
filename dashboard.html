@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body{
+      font-family:Arial;
+      background:#f4f6f9;
+      padding:20px;
+    }
+
+    .card{
+      background:white;
+      padding:15px;
+      border-radius:10px;
+      margin-bottom:15px;
+    }
+
+    select{
+      width:100%;
+      padding:10px;
+      border-radius:8px;
+      margin-bottom:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>📊 OT Dashboard</h2>
+
+<div class="card">
+  <select id="week" onchange="load()">
+    <option value="">All Week</option>
+    <option value="17">Week 17</option>
+    <option value="18">Week 18</option>
+    <option value="19">Week 19</option>
+  </select>
+</div>
+
+<div class="card">
+  <canvas id="chart"></canvas>
+</div>
+
+<div class="card">
+  <table id="tbl"></table>
+</div>
+
+<script>
+
+const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
+
+let chart;
+
+// ================= LOAD =================
+function load(){
+
+  const week = document.getElementById("week").value;
+
+  fetch(API + "?action=getDashboard&week=" + week)
+  .then(res => res.json())
+  .then(data => {
+
+    drawChart(data);
+    renderTable(data);
+
+  });
+}
+
+
+// ================= CHART =================
+function drawChart(data){
+
+  const labels = data.map(r=>r.name);
+  const values = data.map(r=>r.total);
+
+  if(chart) chart.destroy();
+
+  chart = new Chart(document.getElementById("chart"), {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "OT Hour",
+        data: values
+      }]
+    }
+  });
+}
+
+
+// ================= TABLE =================
+function renderTable(data){
+
+  let html = "<tr><th>Name</th><th>Phase</th><th>Total OT</th></tr>";
+
+  data.forEach(r=>{
+    html += `<tr>
+      <td>${r.name}</td>
+      <td>${r.phase}</td>
+      <td>${r.total}</td>
+    </tr>`;
+  });
+
+  document.getElementById("tbl").innerHTML = html;
+}
+
+
+// load ครั้งแรก
+load();
+
+</script>
+
+</body>
+</html>
