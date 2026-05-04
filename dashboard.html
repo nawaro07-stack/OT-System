@@ -33,14 +33,7 @@
 
 <h2>📊 OT Dashboard</h2>
 
-<div class="card">
-  <select id="week" onchange="load()">
-    <option value="">All Week</option>
-    <option value="17">Week 17</option>
-    <option value="18">Week 18</option>
-    <option value="19">Week 19</option>
-  </select>
-</div>
+<select id="week" onchange="load()"></select>
 
 <div class="card">
   <canvas id="chart"></canvas>
@@ -109,9 +102,25 @@ function renderTable(data){
   document.getElementById("tbl").innerHTML = html;
 }
 
+function loadWeek(){
 
+  fetch(API + "?action=getWeekList")
+  .then(res => res.json())
+  .then(weeks => {
+
+    let html = '<option value="">All Week</option>';
+
+    weeks.forEach(w=>{
+      html += `<option value="${w}">Week ${w}</option>`;
+    });
+
+    document.getElementById("week").innerHTML = html;
+
+  });
+}
 // load ครั้งแรก
 load();
+loadWeek();
 
 </script>
 
