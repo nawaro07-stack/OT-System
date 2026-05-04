@@ -160,10 +160,10 @@ document.getElementById("phaseField").value = phase;
 
 document.getElementById("username").innerText =
   name + " (" + empcode + ") - " + phase;
-
-window.addEventListener("message", function(e){
-
-  console.log("MESSAGE:", e.data); // debug
+  
+document.getElementById("historyFrame").onload = function(){
+  setTimeout(readTotal, 300);
+};
 
   // 🔥 เช็คว่าเป็น object + มี total
   if(typeof e.data === "object" && e.data.total !== undefined){
@@ -194,6 +194,30 @@ function logout(){
   localStorage.removeItem("user");
   window.location.href = "login.html";
 }
+function readTotal() {
+  try {
+    const frame = document.getElementById("historyFrame");
+
+    const total = frame.contentWindow.document.getElementById("totalData")?.innerText;
+
+    if(total !== undefined){
+      document.getElementById("total").innerText = total;
+
+      if(total > 36){
+        document.getElementById("alert").innerText = "⚠️ OT เกิน 36 ชั่วโมง!";
+        document.getElementById("alert").className = "alert-danger";
+      }else{
+        document.getElementById("alert").innerText = "OK";
+        document.getElementById("alert").className = "alert-ok";
+      }
+    }
+
+  } catch(err){
+    console.log("waiting iframe...");
+  }
+}
+
+
 
 </script>
 <button onclick="logout()">Logout</button>
