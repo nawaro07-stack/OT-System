@@ -2,89 +2,71 @@
 <html>
 <head>
   <title>OT System</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f9;
-      margin: 0;
-      padding: 0;
+    body{
+      font-family: Arial;
+      background:#f4f6f9;
+      margin:0;
+      padding:20px;
     }
 
-    .container {
-      max-width: 500px;
-      margin: auto;
-      padding: 15px;
+    .container{
+      max-width:500px;
+      margin:auto;
     }
 
-    .card {
-      background: white;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    .card{
+      background:white;
+      padding:20px;
+      margin-bottom:15px;
+      border-radius:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);
     }
 
-    h2 {
-      text-align: center;
+    h2{
+      text-align:center;
     }
 
-    .user {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 10px;
+    input{
+      width:100%;
+      padding:10px;
+      margin-top:5px;
+      margin-bottom:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
     }
 
-      input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 5px;
-      margin-bottom: 12px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      box-sizing: border-box; /* 🔥 สำคัญ */
+    button{
+      width:100%;
+      padding:12px;
+      background:#1976d2;
+      color:white;
+      border:none;
+      border-radius:10px;
+      font-size:16px;
+      cursor:pointer;
     }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      background: #007bff;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
+    button:hover{
+      background:#125ea8;
     }
 
-    button:hover {
-      background: #0056b3;
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
     }
 
-    .summary {
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
+    th,td{
+      border:1px solid #ddd;
+      padding:6px;
+      text-align:center;
     }
 
-    .alert-ok {
-      color: green;
-      text-align: center;
-    }
-
-    .alert-danger {
-      color: red;
-      text-align: center;
-    }
-
-    iframe {
-      width: 100%;
-      height: 250px;
-      border: none;
-      border-radius: 10px;
-      background: #fafafa;
-    }
+    .ok{ color:green; }
+    .danger{ color:red; }
   </style>
 </head>
 
@@ -95,12 +77,12 @@
   <h2>OT System</h2>
 
   <div class="card">
-    <div id="username" class="user"></div>
+    <h3 id="username"></h3>
   </div>
 
   <div class="card">
-    <form target="hiddenFrame"
-          action="https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec"
+
+    <form action="https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec"
           method="POST"
           onsubmit="setTimeout(afterSave,500);">
 
@@ -117,28 +99,30 @@
 
       <button type="submit">💾 Save OT</button>
     </form>
+
   </div>
 
   <div class="card">
-    <div class="summary">
-      Weekly OT: <span id="total">-</span> hr
-    </div>
-    <div id="alert"></div>
+    <h3>Weekly OT: <span id="total">0</span> hr</h3>
+    <h4 id="alert"></h4>
   </div>
 
   <div class="card">
     <h3>History</h3>
-    <iframe id="historyFrame"></iframe>
+    <table id="tbl"></table>
+  </div>
+
+  <div class="card">
+    <button onclick="logout()">Logout</button>
   </div>
 
 </div>
 
-<iframe name="hiddenFrame" style="display:none;"></iframe>
-
 <script>
+
 const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
 
-// USER
+// ================= USER =================
 const user = JSON.parse(localStorage.getItem("user"));
 
 if(!user){
@@ -154,55 +138,69 @@ const empcode = user.empcode;
 const name = user.name;
 const phase = user.phase;
 
-// set user info
+// set hidden
 document.getElementById("empcodeField").value = empcode;
 document.getElementById("nameField").value = name;
 document.getElementById("phaseField").value = phase;
 
+// show name
 document.getElementById("username").innerText =
   name + " (" + empcode + ") - " + phase;
 
-window.addEventListener("message", function(e){
 
-  console.log("MSG:", e.data); // debug
+// ================= LOAD DATA =================
+function loadData(){
 
-  // 🔥 รับเฉพาะ object ที่มี total
-  if(e.data && typeof e.data === "object" && "total" in e.data){
+  fetch(API + "?action=getMyData&empcode=" + empcode)
+  .then(res => res.json())
+  .then(res => {
 
-    const total = e.data.total;
+    // 🔥 weekly total
+    document.getElementById("total").innerText = res.total;
 
-    document.getElementById("total").innerText = total;
-
-    if(total > 36){
+    if(res.total > 36){
       document.getElementById("alert").innerText = "⚠️ OT เกิน 36 ชั่วโมง!";
-      document.getElementById("alert").className = "alert-danger";
-    }else{
+      document.getElementById("alert").className = "danger";
+    } else {
       document.getElementById("alert").innerText = "OK";
-      document.getElementById("alert").className = "alert-ok";
+      document.getElementById("alert").className = "ok";
     }
 
-  }
-});
+    // 🔥 table
+    let html = "<tr><th>Date</th><th>OT</th><th>Week</th></tr>";
 
-// LOAD HISTORY
-const frame = document.getElementById("historyFrame");
+    res.data.forEach(r=>{
+      html += `<tr>
+        <td>${r.date}</td>
+        <td>${r.ot}</td>
+        <td>${r.week}</td>
+      </tr>`;
+    });
 
-frame.src = API + "?action=getMyData&empcode=" + empcode;
+    document.getElementById("tbl").innerHTML = html;
 
-// SAVE
+  });
+}
+
+
+// ================= AFTER SAVE =================
 function afterSave(){
   alert("Saved!");
   location.reload();
 }
 
-// LOGOUT
+
+// ================= LOGOUT =================
 function logout(){
   localStorage.removeItem("user");
   window.location.href = "login.html";
 }
 
 
+// load on start
+loadData();
+
 </script>
-<button onclick="logout()">Logout</button>
+
 </body>
 </html>
