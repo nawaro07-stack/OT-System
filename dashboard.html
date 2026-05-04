@@ -13,11 +13,16 @@
       padding:20px;
     }
 
+    h2{
+      text-align:center;
+    }
+
     .card{
       background:white;
       padding:15px;
       border-radius:10px;
       margin-bottom:15px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);
     }
 
     select{
@@ -25,6 +30,25 @@
       padding:10px;
       border-radius:8px;
       margin-bottom:10px;
+      border:1px solid #ccc;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th, td{
+      border:1px solid #ddd;
+      padding:8px;
+      text-align:center;
+    }
+
+    #loading{
+      text-align:center;
+      font-size:18px;
+      color:#555;
+      display:none;
     }
   </style>
 </head>
@@ -33,7 +57,11 @@
 
 <h2>📊 OT Dashboard</h2>
 
-<select id="week" onchange="load()"></select>
+<div class="card">
+  <select id="week" onchange="load()"></select>
+</div>
+
+<div id="loading">⏳ Loading...</div>
 
 <div class="card">
   <canvas id="chart"></canvas>
@@ -49,8 +77,31 @@ const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq
 
 let chart;
 
-// ================= LOAD =================
+// ================= LOAD WEEK =================
+function loadWeek(){
+
+  fetch(API + "?action=getWeekList")
+  .then(res => res.json())
+  .then(weeks => {
+
+    let html = '<option value="">All Week</option>';
+
+    weeks.forEach((w,i)=>{
+      const selected = (i === weeks.length-1) ? "selected" : "";
+      html += `<option value="${w}" ${selected}>Week ${w}</option>`;
+    });
+
+    document.getElementById("week").innerHTML = html;
+
+    load(); // โหลดข้อมูลหลังจาก dropdown พร้อม
+  });
+}
+
+
+// ================= LOAD DATA =================
 function load(){
+
+  document.getElementById("loading").style.display = "block";
 
   const week = document.getElementById("week").value;
 
@@ -58,9 +109,13 @@ function load(){
   .then(res => res.json())
   .then(data => {
 
+    // 🔥 sort มาก → น้อย
+    data.sort((a,b)=> b.total - a.total);
+
     drawChart(data);
     renderTable(data);
 
+    document.getElementById("loading").style.display = "none";
   });
 }
 
@@ -68,8 +123,10 @@ function load(){
 // ================= CHART =================
 function drawChart(data){
 
-  const labels = data.map(r=>r.name);
-  const values = data.map(r=>r.total);
+  const top = data.slice(0,10); // 🔥 top 10
+
+  const labels = top.map(r=>r.name);
+  const values = top.map(r=>r.total);
 
   if(chart) chart.destroy();
 
@@ -78,8 +135,9 @@ function drawChart(data){
     data: {
       labels: labels,
       datasets: [{
-        label: "OT Hour",
-        data: values
+        label: "Top 10 OT Hour",
+        data: values,
+        borderWidth: 1
       }]
     }
   });
@@ -89,10 +147,11 @@ function drawChart(data){
 // ================= TABLE =================
 function renderTable(data){
 
-  let html = "<tr><th>Name</th><th>Phase</th><th>Total OT</th></tr>";
+  let html = "<tr><th>#</th><th>Name</th><th>Phase</th><th>Total OT</th></tr>";
 
-  data.forEach(r=>{
+  data.forEach((r,i)=>{
     html += `<tr>
+      <td>${i+1}</td>
       <td>${r.name}</td>
       <td>${r.phase}</td>
       <td>${r.total}</td>
@@ -102,23 +161,8 @@ function renderTable(data){
   document.getElementById("tbl").innerHTML = html;
 }
 
-function loadWeek(){
 
-  fetch(API + "?action=getWeekList")
-  .then(res => res.json())
-  .then(weeks => {
-
-    let html = '<option value="">All Week</option>';
-
-    weeks.forEach(w=>{
-      html += `<option value="${w}">Week ${w}</option>`;
-    });
-
-    document.getElementById("week").innerHTML = html;
-	load();
-  });
-}
-// 🔥 ต้องมีอันนี้
+// เรียกตอนเปิดหน้า
 loadWeek();
 
 </script>
