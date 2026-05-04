@@ -145,7 +145,7 @@ if(!user){
   alert("กรุณา login ใหม่");
   window.location.href = "login.html";
 }
-// 🔥 ถ้าเป็น admin → ส่งไป admin
+
 if(user.role === "admin"){
   window.location.href = "admin.html";
 }
@@ -154,50 +154,38 @@ const empcode = user.empcode;
 const name = user.name;
 const phase = user.phase;
 
+// set user info
 document.getElementById("empcodeField").value = empcode;
 document.getElementById("nameField").value = name;
 document.getElementById("phaseField").value = phase;
 
 document.getElementById("username").innerText =
   name + " (" + empcode + ") - " + phase;
-  
-document.getElementById("historyFrame").onload = function(){
+
+// LOAD HISTORY
+const frame = document.getElementById("historyFrame");
+
+frame.onload = function(){
   setTimeout(readTotal, 300);
 };
 
-  // 🔥 เช็คว่าเป็น object + มี total
-  if(typeof e.data === "object" && e.data.total !== undefined){
-
-    document.getElementById("total").innerText = e.data.total;
-
-    if(e.data.total > 36){
-      document.getElementById("alert").innerText = "⚠️ OT เกิน 36 ชั่วโมง!";
-      document.getElementById("alert").className = "alert-danger";
-    }else{
-      document.getElementById("alert").innerText = "OK";
-      document.getElementById("alert").className = "alert-ok";
-    }
-
-  }
-});
-
-// LOAD HISTORY
-document.getElementById("historyFrame").src =
-  API + "?action=getMyData&empcode=" + empcode;
+frame.src = API + "?action=getMyData&empcode=" + empcode;
 
 // SAVE
 function afterSave(){
   alert("Saved!");
   location.reload();
 }
+
+// LOGOUT
 function logout(){
   localStorage.removeItem("user");
   window.location.href = "login.html";
 }
+
+// READ TOTAL FROM IFRAME
 function readTotal() {
   try {
-    const frame = document.getElementById("historyFrame");
-
     const total = frame.contentWindow.document.getElementById("totalData")?.innerText;
 
     if(total !== undefined){
@@ -216,9 +204,6 @@ function readTotal() {
     console.log("waiting iframe...");
   }
 }
-
-
-
 </script>
 <button onclick="logout()">Logout</button>
 </body>
