@@ -5,67 +5,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-    body{ font-family:Arial; background:#f4f6f9; padding:20px; }
-    .card{ background:white; padding:15px; margin-bottom:15px; border-radius:10px; }
+    body{
+      font-family: Arial;
+      background:#f4f6f9;
+      padding:20px;
+      margin:0;
+    }
+
+    .container{
+      max-width:600px;
+      margin:auto;
+    }
+
+    .card{
+      background:white;
+      padding:15px;
+      margin-bottom:15px;
+      border-radius:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h2{
+      text-align:center;
+    }
 
     input{
       width:100%;
       padding:10px;
-      margin-bottom:10px;
       border-radius:8px;
       border:1px solid #ccc;
+      margin-bottom:10px;
     }
 
     table{
       width:100%;
       border-collapse:collapse;
+      font-size:14px;
     }
 
-    th,td{
+    th, td{
       border:1px solid #ddd;
       padding:8px;
       text-align:center;
     }
 
     button{
-      padding:10px;
       width:100%;
+      padding:12px;
+      border:none;
+      border-radius:10px;
       background:#d32f2f;
       color:white;
-      border:none;
-      border-radius:8px;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    button:hover{
+      background:#a82323;
     }
   </style>
 </head>
 
 <body>
 
-<h2>Admin Panel</h2>
+<div class="container">
 
-<div class="card">
-  <input type="text" id="search" placeholder="Search name / empcode" onkeyup="render()">
+  <h2>Admin Panel</h2>
+
+  <div class="card">
+    <input type="text" id="search" placeholder="Search name / empcode" onkeyup="render()">
+  </div>
+
+  <div class="card">
+    <table id="tbl"></table>
+  </div>
+
+  <div class="card">
+    <button onclick="logout()">Logout</button>
+  </div>
+
 </div>
 
-<div class="card">
-  <table id="tbl"></table>
-</div>
-
-<div class="card">
-  <button onclick="logout()">Logout</button>
-</div>
-
+<!-- 🔥 SCRIPT ต้องอยู่ล่างสุด -->
 <script>
 
 const API = "https://script.google.com/macros/s/AKfycbw8lqY0RHOW7B1rdSZJG83ta1yq_NB-cU_uaEYD7_NhQSw-XUU_Ihy3AyWXeSYgkVwhbg/exec";
 
 // ================= AUTH =================
-const user = JSON.parse(localStorage.getItem("user"));
+const userRaw = localStorage.getItem("user");
 
-if(!user || user.role !== "admin"){
-  alert("ไม่มีสิทธิ์");
+if(!userRaw){
+  alert("กรุณา login ใหม่");
   window.location.href = "login.html";
 }
 
+const user = JSON.parse(userRaw);
+
+console.log("USER:", user);
+
+// 🔥 ตรวจ role
+if(user.role !== "admin"){
+  alert("Access denied");
+  window.location.href = "login.html";
+}
+
+
+// ================= DATA =================
 let allData = [];
 
 // ================= LOAD =================
@@ -75,9 +120,15 @@ function load(){
   .then(res => res.json())
   .then(data => {
 
+    console.log("DATA:", data);
+
     allData = data;
     render();
 
+  })
+  .catch(err=>{
+    console.error(err);
+    alert("โหลดข้อมูลไม่ได้");
   });
 }
 
@@ -114,6 +165,8 @@ function logout(){
   window.location.href = "login.html";
 }
 
+
+// เรียกตอนเปิดหน้า
 load();
 
 </script>
