@@ -107,8 +107,7 @@ function loadWeek(){
     document.getElementById("week").innerHTML = html;
 
     load(); // โหลดข้อมูลหลังจาก dropdown พร้อม
-    loadWeek();
-    loadPhaseList(); // 👈 เพิ่ม
+
   });
 }
 
@@ -131,9 +130,10 @@ function load(){
     renderTable(data);
 
     document.getElementById("loading").style.display = "none";
+    loadPhase(); // 👈 เพิ่มตรงนี้
+    loadTop(); // 👈 เพิ่มตรงนี้
   });
-	loadPhase(); // 👈 เพิ่มตรงนี้
-	loadTop(); // 👈 เพิ่มตรงนี้
+	
 }
 
 
@@ -256,7 +256,9 @@ function loadTop(){
 
   });
 }
-
+	loadWeek();
+	loadPhaseList();
+	
 </script>
 
 </body>
