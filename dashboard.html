@@ -59,6 +59,9 @@
 
 <div class="card">
   <select id="week" onchange="load()"></select>
+  <select id="phase" onchange="load()">
+  <option value="">All Phase</option>
+</select>
 </div>
 
 <div id="loading">⏳ Loading...</div>
@@ -76,6 +79,10 @@
   <canvas id="phaseChart"></canvas>
 </div>
 
+<div class="card">
+  <h3>Top 10 (Selected Phase)</h3>
+  <canvas id="topChart"></canvas>
+</div>
 
 <script>
 
@@ -100,6 +107,8 @@ function loadWeek(){
     document.getElementById("week").innerHTML = html;
 
     load(); // โหลดข้อมูลหลังจาก dropdown พร้อม
+    loadWeek();
+    loadPhaseList(); // 👈 เพิ่ม
   });
 }
 
@@ -124,6 +133,7 @@ function load(){
     document.getElementById("loading").style.display = "none";
   });
 	loadPhase(); // 👈 เพิ่มตรงนี้
+	loadTop(); // 👈 เพิ่มตรงนี้
 }
 
 
@@ -193,6 +203,52 @@ function loadPhase(){
         labels: labels,
         datasets: [{
           label: "OT by Phase",
+          data: values
+        }]
+      }
+    });
+
+  });
+}
+
+function loadPhaseList(){
+
+  fetch(API + "?action=getPhaseDashboard")
+  .then(res => res.json())
+  .then(data => {
+
+    let html = '<option value="">All Phase</option>';
+
+    data.forEach(r=>{
+      html += `<option value="${r.phase}">${r.phase}</option>`;
+    });
+
+    document.getElementById("phase").innerHTML = html;
+  });
+}
+
+let topChart;
+
+function loadTop(){
+
+  const week = document.getElementById("week").value;
+  const phase = document.getElementById("phase").value;
+
+  fetch(API + `?action=getTopByPhase&week=${week}&phase=${phase}`)
+  .then(res => res.json())
+  .then(data => {
+
+    const labels = data.map(r=>r.name);
+    const values = data.map(r=>r.total);
+
+    if(topChart) topChart.destroy();
+
+    topChart = new Chart(document.getElementById("topChart"), {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Top OT",
           data: values
         }]
       }
